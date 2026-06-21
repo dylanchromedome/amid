@@ -16,6 +16,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 {
     private readonly DownloadService _downloadService = new();
     private readonly DownloadPersistenceService _persistenceService = new();
+    private readonly GitHubUpdateService _updateService = new();
     private readonly Dictionary<DownloadItem, DownloadRunContext> _downloadContexts = new();
     private readonly DispatcherTimer _saveTimer;
     private ChromeIntegrationServer? _chromeIntegrationServer;
@@ -23,6 +24,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private DownloadItem? _selectedDownload;
     private int _activeDownloadCount;
     private bool _saveWarningShown;
+    private bool _startupUpdateCheckStarted;
 
     public MainWindow()
     {
@@ -60,6 +62,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         InitializeComponent();
         DataContext = this;
+        Loaded += MainWindow_Loaded;
         StartChromeIntegrationServer();
     }
 
@@ -147,6 +150,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void AddDownload_Click(object sender, RoutedEventArgs e)
     {
         AddDownloadFromTextBox();
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_startupUpdateCheckStarted)
+        {
+            return;
+        }
+
+        _startupUpdateCheckStarted = true;
+        _ = CheckForUpdatesAsync(showNoUpdateMessage: false);
     }
 
     private void UrlTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -241,6 +255,73 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             FileName = DownloadFolder,
             UseShellExecute = true
         });
+    }
+
+    private void CheckUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        _ = CheckForUpdatesAsync(showNoUpdateMessage: true);
+    }
+
+    private async Task CheckForUpdatesAsync(bool showNoUpdateMessage)
+    {
+        try
+        {
+            AddLog("Checking GitHub releases for updates.");
+            GitHubUpdateInfo? updateInfo = await _updateService.CheckForUpdateAsync(CancellationToken.None);
+            if (updateInfo is null)
+            {
+                AddLog("No AMID update found.");
+                if (showNoUpdateMessage)
+                {
+                    MessageBox.Show(
+                        this,
+                        $"AMID { _updateService.CurrentVersionText } is up to date.",
+                        "AMID Updates",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+
+                return;
+            }
+
+            var prompt = new UpdatePromptWindow(updateInfo, _updateService.CurrentVersionText)
+            {
+                Owner = this
+            };
+
+            if (prompt.ShowDialog() != true)
+            {
+                AddLog($"Skipped update {updateInfo.TagName}.");
+                return;
+            }
+
+            AddLog($"Downloading update {updateInfo.TagName}.");
+            Mouse.OverrideCursor = Cursors.Wait;
+            string zipPath = await _updateService.DownloadUpdateAsync(
+                updateInfo,
+                progress: null,
+                cancellationToken: CancellationToken.None);
+            Mouse.OverrideCursor = null;
+
+            AddLog($"Downloaded update package {updateInfo.AssetName}.");
+            _updateService.LaunchUpdater(zipPath, Environment.ProcessId);
+            AddLog("Updater launched. AMID will close and reopen after the update.");
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            Mouse.OverrideCursor = null;
+            AddLog($"Update check failed: {ex.Message}");
+            if (showNoUpdateMessage)
+            {
+                MessageBox.Show(
+                    this,
+                    $"Could not check for updates:\n\n{ex.Message}",
+                    "AMID Updates",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
     }
 
     private void AddDownloadFromTextBox()
@@ -521,14 +602,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         return categoryKey switch
         {
-            "all" => !item.IsOld || item.Status == "Completed",
+            "all" => !item.IsOld,
             "downloading" => !item.IsOld
                              && (item.IsActive || item.Status is "Connecting" or "Downloading" or "Downloading (no resume)" or "Resuming" or "Retrying" or "Pausing" or "Canceling"),
             "completed" => item.Status == "Completed",
             "failed" => !item.IsOld && (item.Status is "Failed" or "Resume not supported" or "Interrupted"),
             "paused" => !item.IsOld && item.Status == "Paused",
             "old" => item.IsOld || item.Status == "Canceled",
-            _ => !item.IsOld || item.Status == "Completed"
+            _ => !item.IsOld
         };
     }
 

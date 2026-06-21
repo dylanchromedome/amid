@@ -154,6 +154,14 @@
                             <TextBlock VerticalAlignment="Center" Text="Open Folder" />
                         </StackPanel>
                     </Button>
+                    <Button Click="CheckUpdates_Click"
+                            MinWidth="98"
+                            Style="{StaticResource ToolbarButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE895;" />
+                            <TextBlock VerticalAlignment="Center" Text="Updates" />
+                        </StackPanel>
+                    </Button>
                 </ToolBar>
             </ToolBarTray>
         </Border>

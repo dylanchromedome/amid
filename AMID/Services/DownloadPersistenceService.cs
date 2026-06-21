@@ -78,15 +78,10 @@ public sealed class DownloadPersistenceService
             persistedItem.SupportsResume,
             persistedItem.Status,
             persistedItem.ErrorMessage,
-            persistedItem.IsOld || IsOldRestoredItem(persistedItem.Status),
+            isOld: true,
             partialFileExists);
 
         return item;
-    }
-
-    private static bool IsOldRestoredItem(string status)
-    {
-        return status != "Completed";
     }
 
     private void BackupUnreadableStateFile()

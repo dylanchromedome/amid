@@ -9,4 +9,10 @@
     <ApplicationIcon />
     <Version>0.6.0</Version>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\scripts\apply-update.ps1"
+          Link="apply-update.ps1"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

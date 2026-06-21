@@ -17,6 +17,7 @@ $appOutput = Join-Path $releaseRoot "AMID"
 $extensionOutput = Join-Path $releaseRoot "chrome-extension"
 $projectPath = Join-Path $repoRoot "AMID\AMID.csproj"
 $nugetConfigPath = Join-Path $repoRoot "NuGet.Config"
+$appExtensionOutput = Join-Path $appOutput "chrome-extension"
 
 function Invoke-Dotnet {
     param(
@@ -51,7 +52,11 @@ Invoke-Dotnet publish $projectPath `
     --output $appOutput
 
 Copy-Item -LiteralPath (Join-Path $repoRoot "chrome-extension") -Destination $extensionOutput -Recurse
+Copy-Item -LiteralPath (Join-Path $repoRoot "chrome-extension") -Destination $appExtensionOutput -Recurse
 Copy-Item -LiteralPath (Join-Path $repoRoot "README.md") -Destination (Join-Path $releaseRoot "README.md")
+Copy-Item -LiteralPath (Join-Path $repoRoot "scripts\install-portable.ps1") -Destination (Join-Path $releaseRoot "install-portable.ps1")
+Copy-Item -LiteralPath (Join-Path $repoRoot "scripts\uninstall-amid.ps1") -Destination (Join-Path $releaseRoot "uninstall-amid.ps1")
+Copy-Item -LiteralPath (Join-Path $repoRoot "scripts\apply-update.ps1") -Destination (Join-Path $appOutput "apply-update.ps1")
 
 Write-Host "Release created:"
 Write-Host $releaseRoot
