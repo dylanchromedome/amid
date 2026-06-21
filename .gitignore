@@ -1,0 +1,6 @@
+.dotnet/
+.tools/
+.nuget/
+artifacts/
+AMID/bin/
+AMID/obj/
