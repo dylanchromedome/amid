@@ -36,7 +36,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             new("completed", "Completed"),
             new("failed", "Failed"),
             new("paused", "Paused"),
-            new("canceled", "Canceled")
+            new("old", "Old")
         ];
         _selectedCategory = Categories[0];
 
@@ -131,7 +131,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             else
             {
                 context.StopReason = DownloadStopReason.Cancel;
-                DownloadService.DeletePartialFile(item.PartialPath);
+                DeleteDownloadResidue(item);
                 item.ClearPartialPath();
                 item.MarkCanceled();
             }
@@ -186,21 +186,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         AddLog($"Pause requested for {SelectedDownload.FileName}.");
     }
 
-    private void ResumeSelected_Click(object sender, RoutedEventArgs e)
+    private void RetrySelected_Click(object sender, RoutedEventArgs e)
     {
         if (SelectedDownload is null)
         {
-            AddLog("No download selected to resume.");
+            AddLog("No download selected to retry.");
             return;
         }
 
-        if (SelectedDownload.SupportsResume != true)
+        if (SelectedDownload.IsActive)
         {
-            AddLog($"Cannot resume {SelectedDownload.FileName}; the server does not support HTTP range requests.");
+            AddLog($"{SelectedDownload.FileName} is already active.");
             return;
         }
 
-        StartDownload(SelectedDownload, isResume: true);
+        StartDownload(SelectedDownload, isRetry: true);
     }
 
     private void CancelSelected_Click(object sender, RoutedEventArgs e)
@@ -226,7 +226,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        DownloadService.DeletePartialFile(SelectedDownload.PartialPath);
+        DeleteDownloadResidue(SelectedDownload);
         SelectedDownload.ClearPartialPath();
         SelectedDownload.MarkCanceled();
         QueueSave();
@@ -265,12 +265,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         OnPropertyChanged(nameof(TotalDownloadsText));
 
         AddLog($"{logPrefix} {item.FileName}.");
-        StartDownload(item, isResume: false);
+        StartDownload(item, isRetry: false);
         QueueSave();
         return item;
     }
 
-    private void StartDownload(DownloadItem item, bool isResume)
+    private void StartDownload(DownloadItem item, bool isRetry)
     {
         if (_downloadContexts.ContainsKey(item))
         {
@@ -278,15 +278,27 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        if (isResume && item.SupportsResume != true)
+        bool canContinuePartial = isRetry
+                                  && item.SupportsResume == true
+                                  && !string.IsNullOrWhiteSpace(item.PartialPath)
+                                  && File.Exists(item.PartialPath);
+
+        if (isRetry && !canContinuePartial)
         {
-            AddLog($"Cannot resume {item.FileName}; HTTP range support is not available.");
-            return;
+            DeleteDownloadResidue(item);
+            item.ClearPartialPath();
         }
 
-        item.MarkStarting(isResume);
+        item.MarkStarting(isRetry);
         var context = new DownloadRunContext(new CancellationTokenSource());
         _downloadContexts[item] = context;
+        if (isRetry)
+        {
+            AddLog(canContinuePartial
+                ? $"Retrying {item.FileName} from the saved partial file."
+                : $"Retrying {item.FileName} from the beginning.");
+        }
+
         _ = RunDownloadAsync(item, context);
     }
 
@@ -331,7 +343,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
         catch (OperationCanceledException)
         {
-            DownloadService.DeletePartialFile(item.PartialPath);
+            DeleteDownloadResidue(item);
             item.ClearPartialPath();
             item.MarkCanceled();
             AddLog($"Canceled {item.FileName}.");
@@ -386,6 +398,35 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             item.SupportsResume);
     }
 
+    private void DeleteDownloadResidue(DownloadItem item)
+    {
+        DeleteResidueFile(item.PartialPath);
+
+        if (item.Status != "Completed"
+            && !string.IsNullOrWhiteSpace(item.DestinationPath)
+            && !string.Equals(item.DestinationPath, item.PartialPath, StringComparison.OrdinalIgnoreCase))
+        {
+            DeleteResidueFile(item.DestinationPath);
+        }
+    }
+
+    private void DeleteResidueFile(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            return;
+        }
+
+        try
+        {
+            File.Delete(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            AddLog($"Could not delete leftover file {Path.GetFileName(path)}: {ex.Message}");
+        }
+    }
+
     private void AddDownloadItem(DownloadItem item)
     {
         item.PropertyChanged += DownloadItem_PropertyChanged;
@@ -396,7 +437,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void DownloadItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(DownloadItem.Status) or nameof(DownloadItem.IsActive))
+        if (e.PropertyName is nameof(DownloadItem.Status) or nameof(DownloadItem.IsActive) or nameof(DownloadItem.IsOld))
         {
             UpdateCategoryCounts();
             DownloadsView.Refresh();
@@ -480,12 +521,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         return categoryKey switch
         {
-            "downloading" => item.IsActive || item.Status is "Connecting" or "Downloading" or "Downloading (no resume)" or "Resuming" or "Pausing" or "Canceling",
+            "all" => !item.IsOld || item.Status == "Completed",
+            "downloading" => !item.IsOld
+                             && (item.IsActive || item.Status is "Connecting" or "Downloading" or "Downloading (no resume)" or "Resuming" or "Retrying" or "Pausing" or "Canceling"),
             "completed" => item.Status == "Completed",
-            "failed" => item.Status is "Failed" or "Resume not supported" or "Interrupted",
-            "paused" => item.Status == "Paused",
-            "canceled" => item.Status == "Canceled",
-            _ => true
+            "failed" => !item.IsOld && (item.Status is "Failed" or "Resume not supported" or "Interrupted"),
+            "paused" => !item.IsOld && item.Status == "Paused",
+            "old" => item.IsOld || item.Status == "Canceled",
+            _ => !item.IsOld || item.Status == "Completed"
         };
     }
 

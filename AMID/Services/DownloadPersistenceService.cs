@@ -78,9 +78,15 @@ public sealed class DownloadPersistenceService
             persistedItem.SupportsResume,
             persistedItem.Status,
             persistedItem.ErrorMessage,
+            persistedItem.IsOld || IsOldRestoredItem(persistedItem.Status),
             partialFileExists);
 
         return item;
+    }
+
+    private static bool IsOldRestoredItem(string status)
+    {
+        return status != "Completed";
     }
 
     private void BackupUnreadableStateFile()
@@ -114,6 +120,8 @@ public sealed class DownloadPersistenceService
 
         public string ErrorMessage { get; set; } = "--";
 
+        public bool IsOld { get; set; }
+
         public static PersistedDownloadItem FromDownloadItem(DownloadItem item)
         {
             return new PersistedDownloadItem
@@ -126,7 +134,8 @@ public sealed class DownloadPersistenceService
                 TotalBytes = item.TotalBytes,
                 SupportsResume = item.SupportsResume,
                 Status = item.Status,
-                ErrorMessage = item.ErrorMessage
+                ErrorMessage = item.ErrorMessage,
+                IsOld = item.IsOld
             };
         }
     }

@@ -64,8 +64,9 @@ public sealed class DownloadService
         byte[] buffer = ArrayPool<byte>.Shared.Rent(81920);
         var stopwatch = Stopwatch.StartNew();
         long downloadedBytes = resumeFromBytes;
-        long bytesAtLastReport = resumeFromBytes;
         TimeSpan lastReportTime = TimeSpan.Zero;
+        var transferSamples = new Queue<TransferSample>();
+        transferSamples.Enqueue(new TransferSample(TimeSpan.Zero, resumeFromBytes));
 
         try
         {
@@ -97,8 +98,10 @@ public sealed class DownloadService
                     TimeSpan elapsed = stopwatch.Elapsed;
                     if (elapsed - lastReportTime >= TimeSpan.FromMilliseconds(250))
                     {
-                        double seconds = Math.Max((elapsed - lastReportTime).TotalSeconds, 0.001);
-                        double speed = (downloadedBytes - bytesAtLastReport) / seconds;
+                        double speed = GetAverageSpeedBytesPerSecond(
+                            transferSamples,
+                            elapsed,
+                            downloadedBytes);
                         progress.Report(new DownloadProgress(
                             fileName,
                             destinationPath,
@@ -109,7 +112,6 @@ public sealed class DownloadService
                             "Downloading",
                             supportsResume));
 
-                        bytesAtLastReport = downloadedBytes;
                         lastReportTime = elapsed;
                     }
                 }
@@ -135,6 +137,29 @@ public sealed class DownloadService
             supportsResume));
 
         return new DownloadResult(fileName, finalDestinationPath, downloadedBytes, totalBytes, supportsResume);
+    }
+
+    private static double GetAverageSpeedBytesPerSecond(
+        Queue<TransferSample> transferSamples,
+        TimeSpan elapsed,
+        long downloadedBytes)
+    {
+        transferSamples.Enqueue(new TransferSample(elapsed, downloadedBytes));
+
+        while (transferSamples.Count > 1
+               && elapsed - transferSamples.Peek().Elapsed > TimeSpan.FromSeconds(5))
+        {
+            transferSamples.Dequeue();
+        }
+
+        TransferSample oldestSample = transferSamples.Peek();
+        double seconds = (elapsed - oldestSample.Elapsed).TotalSeconds;
+        if (seconds <= 0)
+        {
+            return 0;
+        }
+
+        return Math.Max(0, (downloadedBytes - oldestSample.DownloadedBytes) / seconds);
     }
 
     public static string GetSuggestedFileName(string url)
@@ -342,6 +367,8 @@ public sealed class DownloadService
             }
         }
     }
+
+    private readonly record struct TransferSample(TimeSpan Elapsed, long DownloadedBytes);
 }
 
 public sealed record DownloadRequest(

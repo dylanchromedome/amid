@@ -129,12 +129,12 @@
                             <TextBlock VerticalAlignment="Center" Text="Pause" />
                         </StackPanel>
                     </Button>
-                    <Button Click="ResumeSelected_Click"
-                            IsEnabled="{Binding SelectedDownload.CanResume}"
+                    <Button Click="RetrySelected_Click"
+                            IsEnabled="{Binding SelectedDownload.CanRetry}"
                             Style="{StaticResource ToolbarButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE768;" />
-                            <TextBlock VerticalAlignment="Center" Text="Resume" />
+                            <TextBlock VerticalAlignment="Center" Text="Retry" />
                         </StackPanel>
                     </Button>
                     <Button Click="CancelSelected_Click"
@@ -307,6 +307,11 @@
                                             <Setter TargetName="StatusBadge" Property="Background" Value="#F0ECFF" />
                                             <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#B6A7F0" />
                                             <Setter TargetName="StatusText" Property="Foreground" Value="#5945A8" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Retrying">
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#E8F1FF" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#98BFF5" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#1B5CA8" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Paused">
                                             <Setter TargetName="StatusBadge" Property="Background" Value="#FFF4D8" />

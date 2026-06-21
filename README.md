@@ -8,10 +8,11 @@ The Chrome integration is intentionally temporary: Chrome downloads are sent to 
 
 - Add HTTP or HTTPS URLs manually.
 - Download multiple files at once.
-- Show filename, URL, progress, downloaded size, total size, speed, ETA, resume support, and status.
-- Cancel active downloads.
-- Pause/resume only when the server supports HTTP range requests.
+- Show filename, URL, progress, downloaded size, total size, smoothed speed/ETA, resume support, and status.
+- Cancel active or failed downloads; canceling an unfinished row removes leftover partial files.
+- Pause only when the server supports HTTP range requests; use Retry to continue supported partial downloads or start failed ones again.
 - Persist the download list between app restarts.
+- Keep canceled/old rows out of the default All view while completed files stay visible.
 - Chrome extension handoff through a local-only helper server.
 - Crash report dialog with saved reports under `%LocalAppData%\AMID\CrashReports`.
 

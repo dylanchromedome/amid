@@ -19,6 +19,7 @@ public sealed class DownloadItem : INotifyPropertyChanged
     private string _eta = "--";
     private string _status = "Queued";
     private string _errorMessage = "--";
+    private bool _isOld;
 
     public DownloadItem(string fileName, string url)
     {
@@ -152,24 +153,36 @@ public sealed class DownloadItem : INotifyPropertyChanged
         private set => SetField(ref _errorMessage, value);
     }
 
+    public bool IsOld
+    {
+        get => _isOld;
+        private set
+        {
+            if (SetField(ref _isOld, value))
+            {
+                NotifyActionPropertiesChanged();
+            }
+        }
+    }
+
     public bool CanPause => IsActive && SupportsResume == true;
 
-    public bool CanResume => !IsActive
-                             && SupportsResume == true
-                             && Status is "Paused" or "Failed" or "Interrupted" or "Resume not supported";
+    public bool CanRetry => !IsActive
+                            && Status is "Paused" or "Failed" or "Interrupted" or "Resume not supported";
 
     public bool CanCancel => IsActive
                              || Status is "Queued" or "Paused" or "Failed" or "Interrupted" or "Resume not supported";
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void MarkStarting(bool isResume)
+    public void MarkStarting(bool isRetry)
     {
         IsActive = true;
+        IsOld = false;
         Speed = "0 B/s";
         Eta = "--";
         ErrorMessage = "--";
-        Status = isResume ? "Resuming" : "Connecting";
+        Status = isRetry ? "Retrying" : "Connecting";
     }
 
     public void UpdateProgress(
@@ -218,6 +231,7 @@ public sealed class DownloadItem : INotifyPropertyChanged
     public void MarkCompleted(string destinationPath)
     {
         IsActive = false;
+        IsOld = false;
         DestinationPath = destinationPath;
         PartialPath = string.Empty;
         ProgressPercent = TotalBytes is > 0 ? 100 : ProgressPercent;
@@ -237,6 +251,7 @@ public sealed class DownloadItem : INotifyPropertyChanged
     public void MarkCanceled()
     {
         IsActive = false;
+        IsOld = true;
         Speed = "0 B/s";
         Eta = "--";
         Status = "Canceled";
@@ -277,8 +292,10 @@ public sealed class DownloadItem : INotifyPropertyChanged
         bool? supportsResume,
         string status,
         string errorMessage,
+        bool isOld,
         bool partialFileExists)
     {
+        IsOld = isOld;
         DestinationPath = destinationPath;
         PartialPath = partialPath;
         DownloadedBytes = downloadedBytes;
@@ -294,9 +311,14 @@ public sealed class DownloadItem : INotifyPropertyChanged
         ErrorMessage = string.IsNullOrWhiteSpace(errorMessage) ? "--" : errorMessage;
         IsActive = false;
 
-        Status = status is "Downloading" or "Downloading (no resume)" or "Connecting" or "Resuming" or "Pausing" or "Canceling" or "Queued"
+        Status = status is "Downloading" or "Downloading (no resume)" or "Connecting" or "Resuming" or "Retrying" or "Pausing" or "Canceling" or "Queued"
             ? GetRestartStatus(partialFileExists)
             : status;
+
+        if (Status == "Canceled")
+        {
+            IsOld = true;
+        }
     }
 
     public void ClearPartialPath()
@@ -317,7 +339,7 @@ public sealed class DownloadItem : INotifyPropertyChanged
     private void NotifyActionPropertiesChanged()
     {
         OnPropertyChanged(nameof(CanPause));
-        OnPropertyChanged(nameof(CanResume));
+        OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(CanCancel));
     }
 
