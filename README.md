@@ -13,7 +13,7 @@ https://github.com/dylanchromedome/amid/releases/latest
 2. Download the newest zip, named like:
 
 ```text
-AMID-portable-win-x64-v0.9.2.zip
+AMID-portable-win-x64-v0.9.3.zip
 ```
 
 3. Right-click the zip and choose `Extract All`.

@@ -8,6 +8,6 @@
     <AssemblyName>AMID.Setup</AssemblyName>
     <ApplicationIcon>..\AMID\Assets\V3favicon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>0.9.2</Version>
+    <Version>0.9.3</Version>
   </PropertyGroup>
 </Project>

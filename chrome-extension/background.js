@@ -1,5 +1,7 @@
 const AMID_ENDPOINT = "http://127.0.0.1:51234/api/downloads";
 const AMID_TIMEOUT_MS = 1200;
+const EXTENSION_STARTED_AT_MS = Date.now();
+const STARTUP_GRACE_MS = 15000;
 const handledDownloadIds = new Set();
 
 chrome.downloads.onCreated.addListener((downloadItem) => {
@@ -12,6 +14,10 @@ async function handleDownloadCreated(downloadItem) {
   }
 
   const currentItem = await getFreshDownloadItem(downloadItem);
+  if (!isNewActiveDownload(currentItem)) {
+    return;
+  }
+
   const url = currentItem.finalUrl || currentItem.url;
   if (!isHttpDownload(url)) {
     return;
@@ -79,6 +85,19 @@ async function sendToAmid(downloadItem, url) {
 
 function isHttpDownload(url) {
   return typeof url === "string" && (url.startsWith("http://") || url.startsWith("https://"));
+}
+
+function isNewActiveDownload(downloadItem) {
+  if (downloadItem.state && downloadItem.state !== "in_progress") {
+    return false;
+  }
+
+  const startedAtMs = Date.parse(downloadItem.startTime || "");
+  if (Number.isFinite(startedAtMs) && startedAtMs < EXTENSION_STARTED_AT_MS - STARTUP_GRACE_MS) {
+    return false;
+  }
+
+  return true;
 }
 
 function delay(milliseconds) {
