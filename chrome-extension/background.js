@@ -11,14 +11,15 @@ async function handleDownloadCreated(downloadItem) {
     return;
   }
 
-  const url = downloadItem.finalUrl || downloadItem.url;
+  const currentItem = await getFreshDownloadItem(downloadItem);
+  const url = currentItem.finalUrl || currentItem.url;
   if (!isHttpDownload(url)) {
     return;
   }
 
   handledDownloadIds.add(downloadItem.id);
 
-  const accepted = await sendToAmid(downloadItem, url);
+  const accepted = await sendToAmid(currentItem, url);
   if (!accepted) {
     handledDownloadIds.delete(downloadItem.id);
     return;
@@ -29,6 +30,17 @@ async function handleDownloadCreated(downloadItem) {
     await chrome.downloads.erase({ id: downloadItem.id });
   } catch (error) {
     console.warn("AMID accepted the download, but Chrome could not cancel its copy.", error);
+  }
+}
+
+async function getFreshDownloadItem(downloadItem) {
+  await delay(250);
+
+  try {
+    const matches = await chrome.downloads.search({ id: downloadItem.id });
+    return matches[0] || downloadItem;
+  } catch {
+    return downloadItem;
   }
 }
 
@@ -67,4 +79,8 @@ async function sendToAmid(downloadItem, url) {
 
 function isHttpDownload(url) {
   return typeof url === "string" && (url.startsWith("http://") || url.startsWith("https://"));
+}
+
+function delay(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }

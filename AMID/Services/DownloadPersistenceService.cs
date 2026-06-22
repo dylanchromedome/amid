@@ -66,7 +66,10 @@ public sealed class DownloadPersistenceService
 
     private static DownloadItem ToDownloadItem(PersistedDownloadItem persistedItem)
     {
-        var item = new DownloadItem(persistedItem.FileName, persistedItem.Url);
+        var item = new DownloadItem(
+            persistedItem.FileName,
+            persistedItem.Url,
+            persistedItem.PreferredFileName);
         bool partialFileExists = !string.IsNullOrWhiteSpace(persistedItem.PartialPath)
                                  && File.Exists(persistedItem.PartialPath);
 
@@ -101,6 +104,8 @@ public sealed class DownloadPersistenceService
 
         public string Url { get; set; } = string.Empty;
 
+        public string PreferredFileName { get; set; } = string.Empty;
+
         public string DestinationPath { get; set; } = string.Empty;
 
         public string PartialPath { get; set; } = string.Empty;
@@ -123,6 +128,7 @@ public sealed class DownloadPersistenceService
             {
                 FileName = item.FileName,
                 Url = item.Url,
+                PreferredFileName = item.PreferredFileName,
                 DestinationPath = item.DestinationPath,
                 PartialPath = item.PartialPath,
                 DownloadedBytes = item.DownloadedBytes,

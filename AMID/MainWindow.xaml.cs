@@ -337,10 +337,16 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         UrlTextBox.Clear();
     }
 
-    private DownloadItem AddDownloadFromUrl(string url, string logPrefix)
+    private DownloadItem AddDownloadFromUrl(
+        string url,
+        string logPrefix,
+        string preferredFileName = "")
     {
         string normalizedUrl = url.Trim();
-        var item = new DownloadItem(DownloadService.GetSuggestedFileName(normalizedUrl), normalizedUrl);
+        string displayFileName = string.IsNullOrWhiteSpace(preferredFileName)
+            ? DownloadService.GetSuggestedFileName(normalizedUrl)
+            : preferredFileName;
+        var item = new DownloadItem(displayFileName, normalizedUrl, preferredFileName);
         AddDownloadItem(item);
         SelectedDownload = item;
         OnPropertyChanged(nameof(TotalDownloadsText));
@@ -407,7 +413,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 new DownloadRequest(
                     item.Url,
                     DownloadFolder,
-                    item.FileName,
+                    item.PreferredFileName,
                     item.DestinationPath,
                     item.PartialPath),
                 progress,
@@ -648,7 +654,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     return ChromeDownloadBridgeResult.CreateRejected("Only HTTP and HTTPS download URLs are supported.");
                 }
 
-                DownloadItem item = AddDownloadFromUrl(url, "Chrome sent");
+                string preferredFileName = DownloadService.GetSafeSuggestedFileName(
+                    request.Filename,
+                    request.Mime);
+                DownloadItem item = AddDownloadFromUrl(url, "Chrome sent", preferredFileName);
                 return ChromeDownloadBridgeResult.CreateAccepted(item.FileName);
             },
             DispatcherPriority.Normal,

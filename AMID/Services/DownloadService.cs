@@ -169,6 +169,34 @@ public sealed class DownloadService
             : "download";
     }
 
+    public static string GetSafeSuggestedFileName(string? fileName, string? mimeType)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return string.Empty;
+        }
+
+        string pathFileName = Path.GetFileName(fileName.Trim());
+        if (string.IsNullOrWhiteSpace(pathFileName))
+        {
+            return string.Empty;
+        }
+
+        string sanitized = SanitizeFileName(pathFileName);
+        if (!string.IsNullOrWhiteSpace(Path.GetExtension(sanitized)))
+        {
+            return sanitized;
+        }
+
+        string extension = GetExtensionFromMimeType(mimeType);
+        if (string.IsNullOrWhiteSpace(extension))
+        {
+            return string.Empty;
+        }
+
+        return SanitizeFileName(sanitized + extension);
+    }
+
     public static void DeletePartialFile(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
@@ -313,6 +341,27 @@ public sealed class DownloadService
         }
 
         return sanitized.Length <= 180 ? sanitized : sanitized[..180];
+    }
+
+    private static string GetExtensionFromMimeType(string? mimeType)
+    {
+        return mimeType?.Split(';', 2)[0].Trim().ToLowerInvariant() switch
+        {
+            "image/png" => ".png",
+            "image/jpeg" => ".jpg",
+            "image/gif" => ".gif",
+            "image/webp" => ".webp",
+            "image/svg+xml" => ".svg",
+            "application/pdf" => ".pdf",
+            "application/zip" => ".zip",
+            "application/x-zip-compressed" => ".zip",
+            "application/x-7z-compressed" => ".7z",
+            "application/x-rar-compressed" => ".rar",
+            "text/plain" => ".txt",
+            "text/csv" => ".csv",
+            "application/json" => ".json",
+            _ => string.Empty
+        };
     }
 
     private static bool IsReservedWindowsFileName(string fileName)

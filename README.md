@@ -1,65 +1,41 @@
 # AMID
 
-AMID is a Windows desktop download manager for normal HTTP and HTTPS links. It is built with C#/.NET and WPF.
+AMID is a Windows desktop download manager for normal HTTP and HTTPS links.
 
-The Chrome integration is intentionally temporary: Chrome downloads are sent to AMID only while the AMID app is open and listening on `127.0.0.1:51234`. If AMID is closed, removed, or unreachable, the Chrome extension leaves Chrome downloads alone.
+The Chrome integration is temporary and safe by design: Chrome downloads are sent to AMID only while AMID is open and listening on `127.0.0.1:51234`. If AMID is closed, removed, or unreachable, Chrome downloads normally.
 
-## Current Features
+## Install
 
-- Add HTTP or HTTPS URLs manually.
-- Download multiple files at once.
-- Show filename, URL, progress, downloaded size, total size, smoothed speed/ETA, resume support, and status.
-- Cancel active or failed downloads; canceling an unfinished row removes leftover partial files.
-- Pause only when the server supports HTTP range requests; use Retry to continue supported partial downloads or start failed ones again.
-- Persist the download list between app restarts.
-- Keep rows from previous app launches in Old; completed rows still show `Completed` there.
-- Chrome extension handoff through a local-only helper server.
-- Crash report dialog with saved reports under `%LocalAppData%\AMID\CrashReports`.
-
-## Project Layout
+1. Go to the AMID releases page:
 
 ```text
-AMID/                    WPF desktop app
-chrome-extension/        Unpacked Chrome extension
-scripts/                 Build/run/uninstall helpers
-artifacts/release/       Generated release output
-artifacts/dist/          Generated portable zip packages
+https://github.com/dylanchromedome/amid/releases/latest
 ```
 
-## Build From Source
-
-From the repo root:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1
-```
-
-This publishes the app to:
+2. Download the newest portable zip, for example:
 
 ```text
-artifacts\release\AMID
+AMID-portable-win-x64-v0.6.1.zip
 ```
 
-The script uses `.dotnet\dotnet.exe` when present, otherwise it uses `dotnet` from `PATH`.
+3. Right-click the zip and choose `Extract All`.
 
-## Portable Package
-
-Create the portable release zip:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-portable.ps1
-```
-
-The zip is created at:
+4. Open the extracted folder and run:
 
 ```text
-artifacts\dist\AMID-portable-win-x64-v0.6.0.zip
+AMID\AMID.exe
 ```
 
-Install the portable build without admin rights:
+If Windows says the .NET Desktop Runtime is missing, install the .NET 8 Desktop Runtime, then run AMID again.
+
+## Optional Portable Install
+
+The zip can also install AMID into your Windows user profile without admin rights.
+
+From the extracted zip folder, run:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\artifacts\release\install-portable.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install-portable.ps1
 ```
 
 Default install location:
@@ -68,145 +44,78 @@ Default install location:
 %LocalAppData%\Programs\AMID
 ```
 
-Optional desktop shortcut:
+To add a desktop shortcut:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\artifacts\release\install-portable.ps1 -DesktopShortcut
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install-portable.ps1 -DesktopShortcut
 ```
 
-## Run The Release Build
+## Chrome Extension
 
-```powershell
-.\scripts\run-release.ps1
-```
-
-Or run directly:
-
-```powershell
-.\artifacts\release\AMID\AMID.exe
-```
-
-If Windows says the .NET Desktop Runtime is missing, install the .NET 8 Desktop Runtime, then run AMID again.
-
-## Chrome Extension Install
-
-1. Build and run AMID.
+1. Start AMID.
 2. Open Chrome.
-3. Go to `chrome://extensions`.
+3. Go to:
+
+```text
+chrome://extensions
+```
+
 4. Enable `Developer mode`.
 5. Click `Load unpacked`.
-6. Select the release extension folder:
+6. Select the extension folder inside your AMID folder.
+
+If you only unzipped AMID:
 
 ```text
-C:\Users\are\Documents\App for Managing Internet Downloads (AMID)\artifacts\release\chrome-extension
+<extracted zip folder>\AMID\chrome-extension
 ```
 
-During development, you can also load the source folder:
-
-```text
-C:\Users\are\Documents\App for Managing Internet Downloads (AMID)\chrome-extension
-```
-
-For the portable install, load this folder:
+If you used the portable installer:
 
 ```text
 %LocalAppData%\Programs\AMID\chrome-extension
 ```
 
-After installation, start a normal HTTP or HTTPS download in Chrome while AMID is open. AMID accepts the URL, then the extension cancels Chrome's copy. If AMID is closed, Chrome downloads normally.
+After this, normal HTTP or HTTPS downloads started in Chrome are sent to AMID while AMID is open. When AMID is closed, Chrome downloads normally.
 
-## Chrome Extension Uninstall
+## Updating
 
-1. Open Chrome.
-2. Go to `chrome://extensions`.
-3. Find `AMID Chrome Integration`.
-4. Click `Remove`.
+AMID checks GitHub Releases for updates when it starts. If a newer release is available, AMID shows a popup asking whether to update.
 
-No Chrome settings are permanently replaced by AMID. Removing or disabling the extension returns Chrome to normal behavior.
+Choosing `Update` downloads the newest portable zip, closes AMID, replaces the app files, and reopens AMID.
 
-## GitHub Auto Updates
+If you loaded the Chrome extension from the AMID folder listed above, reload it in `chrome://extensions` after updating so Chrome uses the newest extension files.
 
-AMID checks the latest public release from:
-
-```text
-https://api.github.com/repos/dylanchromedome/amid/releases/latest
-```
-
-If the newest release tag is higher than the app version in `AMID\AMID.csproj`, AMID shows an update popup. Pressing `Update` downloads the portable `.zip` asset from that GitHub release, closes AMID, replaces the installed app files, and reopens AMID.
-
-Release tag rules:
-
-- Use tags like `v0.6.1`, `v0.7.0`, or `v1.0.0`.
-- The tag version must be higher than `<Version>` in `AMID\AMID.csproj`.
-- Upload the portable zip as a release asset. A good asset name is `AMID-portable-win-x64-v0.6.1.zip`.
-- Do not commit `artifacts\release` or `artifacts\dist` into git. They are ignored and should live on GitHub Releases.
-
-## Publishing A GitHub Release
-
-First bump the version in `AMID\AMID.csproj`, for example:
-
-```xml
-<Version>0.6.1</Version>
-```
-
-Build the portable package:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-portable.ps1
-```
-
-Commit and push the source changes:
-
-```powershell
-git add AMID scripts README.md chrome-extension
-git commit -m "Add portable installer and GitHub updater"
-git push origin main
-```
-
-Create and push a matching tag:
-
-```powershell
-git tag v0.6.1
-git push origin v0.6.1
-```
-
-Then create a GitHub release for that tag at:
-
-```text
-https://github.com/dylanchromedome/amid/releases/new
-```
-
-Upload:
-
-```text
-artifacts\dist\AMID-portable-win-x64-v0.6.1.zip
-```
-
-From then on, installed copies of AMID older than `v0.6.1` will offer that update.
-
-## App Uninstall
+## Uninstall
 
 1. Close AMID.
-2. Remove the Chrome extension using the steps above.
-3. Delete the release folder:
+2. Remove the Chrome extension from `chrome://extensions`.
+3. Delete the AMID folder you extracted or installed.
+
+For the default portable install, delete:
 
 ```text
-C:\Users\are\Documents\App for Managing Internet Downloads (AMID)\artifacts\release
+%LocalAppData%\Programs\AMID
 ```
 
-Optional cleanup:
+Saved download history and crash reports are stored under:
 
-```powershell
-.\scripts\uninstall-amid.ps1 -RemoveRelease -RemoveUserData
+```text
+%LocalAppData%\AMID
 ```
 
-Remove a portable install:
+Deleting that folder removes AMID's saved list and crash reports. It does not delete files from your Downloads folder.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\uninstall-amid.ps1 -RemovePortableInstall
-```
+## Features
 
-`-RemoveUserData` deletes AMID's saved list and crash reports under `%LocalAppData%\AMID`. It does not delete files from your Downloads folder.
+- Add HTTP or HTTPS URLs manually.
+- Download multiple files at once.
+- Show filename, URL, progress, downloaded size, total size, smoothed speed/ETA, range support, and status.
+- Cancel active or failed downloads.
+- Pause only when the server supports HTTP range requests.
+- Retry paused or failed downloads.
+- Keep old rows separate after app restarts.
+- Show crash details in a popup if AMID hits an unexpected error.
 
 ## Troubleshooting
 
@@ -214,19 +123,3 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\uninstall-amid.ps1
 - If another program is already using port `51234`, AMID logs `Chrome integration unavailable`; Chrome will continue downloading normally.
 - If a download cannot be paused, the server probably did not advertise HTTP range support. AMID will show `Range: No` or `Unknown`.
 - If AMID crashes, copy the crash report from the popup or find it in `%LocalAppData%\AMID\CrashReports`.
-
-## Developer Commands
-
-Debug build:
-
-```powershell
-$env:DOTNET_CLI_HOME=(Get-Location).Path
-$env:DOTNET_CLI_TELEMETRY_OPTOUT='1'
-.\.dotnet\dotnet.exe build .\AMID.sln --no-restore
-```
-
-Release publish:
-
-```powershell
-.\scripts\build-release.ps1
-```

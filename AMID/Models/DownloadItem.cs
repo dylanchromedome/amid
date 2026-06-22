@@ -21,10 +21,11 @@ public sealed class DownloadItem : INotifyPropertyChanged
     private string _errorMessage = "--";
     private bool _isOld;
 
-    public DownloadItem(string fileName, string url)
+    public DownloadItem(string fileName, string url, string preferredFileName = "")
     {
         _fileName = fileName;
         Url = url;
+        PreferredFileName = preferredFileName;
     }
 
     public string FileName
@@ -34,6 +35,8 @@ public sealed class DownloadItem : INotifyPropertyChanged
     }
 
     public string Url { get; }
+
+    public string PreferredFileName { get; }
 
     public string DestinationPath
     {
