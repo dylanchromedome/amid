@@ -103,6 +103,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         ? $"Chrome: listening on 127.0.0.1:{ChromeIntegrationServer.Port}"
         : "Chrome: not connected";
 
+    public string ChromeExtensionPath => GetChromeExtensionDirectory();
+
     public bool CloseToTray
     {
         get => _settings.CloseToTray;
@@ -341,6 +343,89 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void CheckUpdates_Click(object sender, RoutedEventArgs e)
     {
         _ = CheckForUpdatesAsync(showNoUpdateMessage: true);
+    }
+
+    private void CopyChromeExtensionPath_Click(object sender, RoutedEventArgs e)
+    {
+        string extensionDirectory = GetChromeExtensionDirectory();
+
+        try
+        {
+            System.Windows.Clipboard.SetText(extensionDirectory);
+            AddLog("Copied Chrome extension folder path.");
+        }
+        catch (Exception ex)
+        {
+            AddLog($"Could not copy Chrome extension folder path: {ex.Message}");
+            System.Windows.MessageBox.Show(
+                this,
+                $"Could not copy the extension path:\n\n{ex.Message}",
+                "AMID Chrome Extension",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+    }
+
+    private void OpenChromeExtensionFolder_Click(object sender, RoutedEventArgs e)
+    {
+        string extensionDirectory = GetChromeExtensionDirectory();
+        if (!Directory.Exists(extensionDirectory))
+        {
+            AddLog($"Chrome extension folder was not found: {extensionDirectory}");
+            System.Windows.MessageBox.Show(
+                this,
+                $"The Chrome extension folder was not found:\n\n{extensionDirectory}",
+                "AMID Chrome Extension",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = extensionDirectory,
+            UseShellExecute = true
+        });
+        AddLog("Opened Chrome extension folder.");
+    }
+
+    private void OpenChromeExtensionsPage_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "chrome.exe",
+                Arguments = "chrome://extensions",
+                UseShellExecute = true
+            });
+            AddLog("Opened Chrome extensions page.");
+        }
+        catch (Exception chromeException)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "chrome://extensions",
+                    UseShellExecute = true
+                });
+                AddLog("Asked Windows to open chrome://extensions.");
+            }
+            catch (Exception fallbackException)
+            {
+                AddLog($"Could not open Chrome extensions page: {fallbackException.Message}");
+                System.Windows.MessageBox.Show(
+                    this,
+                    "Could not open Chrome automatically.\n\n" +
+                    "Open Chrome manually and go to chrome://extensions.\n\n" +
+                    $"Chrome launch error: {chromeException.Message}\n" +
+                    $"Fallback error: {fallbackException.Message}",
+                    "AMID Chrome Extension",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
     }
 
     private void ConfigureTrayIcon()
@@ -853,6 +938,35 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         return Uri.TryCreate(url, UriKind.Absolute, out Uri? uri)
                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+    }
+
+    private static string GetChromeExtensionDirectory()
+    {
+        string baseDirectory = Path.GetFullPath(AppContext.BaseDirectory);
+        string installedCandidate = Path.Combine(baseDirectory, "chrome-extension");
+        if (IsChromeExtensionDirectory(installedCandidate))
+        {
+            return installedCandidate;
+        }
+
+        DirectoryInfo? directory = new(baseDirectory);
+        for (int index = 0; index < 6 && directory is not null; index++)
+        {
+            string repoCandidate = Path.Combine(directory.FullName, "chrome-extension");
+            if (IsChromeExtensionDirectory(repoCandidate))
+            {
+                return repoCandidate;
+            }
+
+            directory = directory.Parent;
+        }
+
+        return installedCandidate;
+    }
+
+    private static bool IsChromeExtensionDirectory(string path)
+    {
+        return Directory.Exists(path) && File.Exists(Path.Combine(path, "manifest.json"));
     }
 
     private static string GetReadableError(Exception exception)

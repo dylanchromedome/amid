@@ -680,6 +680,43 @@
                                       FontSize="12"
                                       IsChecked="{Binding StartWithWindows, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Content="Start with Windows" />
+                            <Border Height="1"
+                                    Margin="0,6,0,12"
+                                    Background="{StaticResource BorderBrush}" />
+                            <TextBlock Margin="0,0,0,4"
+                                       Foreground="{StaticResource ThemeWhiteBrush}"
+                                       FontWeight="SemiBold"
+                                       Text="Chrome extension" />
+                            <TextBlock Margin="0,0,0,10"
+                                       Foreground="{StaticResource ThemeMutedBrush}"
+                                       Text="{Binding ChromeExtensionPath}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button Click="CopyChromeExtensionPath_Click"
+                                        MinWidth="105"
+                                        Style="{StaticResource ToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8C8;" />
+                                        <TextBlock VerticalAlignment="Center" Text="Copy Path" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Click="OpenChromeExtensionFolder_Click"
+                                        MinWidth="116"
+                                        Style="{StaticResource ToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE838;" />
+                                        <TextBlock VerticalAlignment="Center" Text="Open Folder" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Click="OpenChromeExtensionsPage_Click"
+                                        MinWidth="146"
+                                        Style="{StaticResource ToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE774;" />
+                                        <TextBlock VerticalAlignment="Center" Text="Chrome Page" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Log">

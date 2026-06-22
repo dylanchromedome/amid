@@ -12,10 +12,10 @@ The Chrome integration is temporary and safe by design: Chrome downloads are sen
 https://github.com/dylanchromedome/amid/releases/latest
 ```
 
-2. Download the newest portable zip, for example:
+2. Download the newest AMID zip, for example:
 
 ```text
-AMID-portable-win-x64-v0.8.0.zip
+AMID-portable-win-x64-v0.9.1.zip
 ```
 
 3. Right-click the zip and choose `Extract All`.
@@ -23,34 +23,26 @@ AMID-portable-win-x64-v0.8.0.zip
 4. Open the extracted folder and run:
 
 ```text
+install.exe
+```
+
+The installer asks for administrator permission, installs AMID to `C:\Program Files\AMID`, creates a Start Menu shortcut so Windows Search can find AMID, and adds `uninstall.exe` to the install folder. It also shows a Chrome extension helper window with the exact extension folder and buttons to copy the path or open the folder.
+
+If Windows says the .NET Desktop Runtime is missing when AMID starts, install the .NET 8 Desktop Runtime, then run AMID again.
+
+## Run Without Installing
+
+You can still run AMID directly from the extracted zip folder:
+
+```text
 AMID\AMID.exe
 ```
 
-If Windows says the .NET Desktop Runtime is missing, install the .NET 8 Desktop Runtime, then run AMID again.
-
-## Optional Portable Install
-
-The zip can also install AMID into your Windows user profile without admin rights.
-
-From the extracted zip folder, run:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install-portable.ps1
-```
-
-Default install location:
-
-```text
-%LocalAppData%\Programs\AMID
-```
-
-To add a desktop shortcut:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install-portable.ps1 -DesktopShortcut
-```
+Installing is recommended because it adds Windows Search indexing, uninstall support, and Program Files update handling.
 
 ## Chrome Extension
+
+The installer shows these steps after AMID is installed. You can also find the same folder helper inside AMID under `Options` with `Copy Path`, `Open Folder`, and `Chrome Page`.
 
 1. Start AMID.
 2. Open Chrome.
@@ -64,16 +56,16 @@ chrome://extensions
 5. Click `Load unpacked`.
 6. Select the extension folder inside your AMID folder.
 
+If you installed AMID:
+
+```text
+C:\Program Files\AMID\chrome-extension
+```
+
 If you only unzipped AMID:
 
 ```text
 <extracted zip folder>\AMID\chrome-extension
-```
-
-If you used the portable installer:
-
-```text
-%LocalAppData%\Programs\AMID\chrome-extension
 ```
 
 After this, normal HTTP or HTTPS downloads started in Chrome are sent to AMID while AMID is open. When AMID is closed, Chrome downloads normally.
@@ -82,21 +74,27 @@ After this, normal HTTP or HTTPS downloads started in Chrome are sent to AMID wh
 
 AMID checks GitHub Releases for updates when it starts. If a newer release is available, AMID shows a popup asking whether to update.
 
-Choosing `Update` downloads the newest portable zip, closes AMID, replaces the app files, and reopens AMID.
+Choosing `Update` downloads the newest zip, closes AMID, replaces the app files, and reopens AMID. If AMID is installed in `Program Files`, Windows may ask for administrator permission during the update.
 
 If you loaded the Chrome extension from the AMID folder listed above, reload it in `chrome://extensions` after updating so Chrome uses the newest extension files.
 
-## Uninstall
-
-1. Close AMID.
-2. Remove the Chrome extension from `chrome://extensions`.
-3. Delete the AMID folder you extracted or installed.
-
-For the default portable install, delete:
+AMID options such as `Close to tray`, `Show on Chrome download`, and `Start with Windows` are saved here:
 
 ```text
-%LocalAppData%\Programs\AMID
+%LocalAppData%\AMID\settings.json
 ```
+
+## Uninstall
+
+1. Close AMID from the tray icon menu with `Exit`.
+2. Remove the Chrome extension from `chrome://extensions`.
+3. Run:
+
+```text
+C:\Program Files\AMID\uninstall.exe
+```
+
+You can also uninstall AMID from Windows Settings because the installer registers it with Windows.
 
 Saved download history and crash reports are stored under:
 

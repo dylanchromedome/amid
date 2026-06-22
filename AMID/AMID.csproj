@@ -8,7 +8,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>AMID</AssemblyName>
     <ApplicationIcon>Assets\V3favicon.ico</ApplicationIcon>
-    <Version>0.8.0</Version>
+    <Version>0.9.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="Assets\V3favicon.png" />
@@ -19,5 +19,10 @@
           Link="apply-update.ps1"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\chrome-extension\**\*">
+      <Link>chrome-extension\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 </Project>
