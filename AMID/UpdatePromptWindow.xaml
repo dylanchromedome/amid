@@ -27,9 +27,9 @@
                        Foreground="#374151"
                        TextWrapping="Wrap">
                 <Run Text="Current version " />
-                <Run Text="{Binding CurrentVersionText}" />
+                <Run Text="{Binding CurrentVersionText, Mode=OneWay}" />
                 <Run Text=" can be updated to " />
-                <Run Text="{Binding UpdateInfo.TagName}" />
+                <Run Text="{Binding UpdateInfo.TagName, Mode=OneWay}" />
                 <Run Text="." />
             </TextBlock>
 
@@ -52,7 +52,7 @@
 
                     <TextBlock FontWeight="SemiBold" Text="Release" />
                     <TextBlock Grid.Column="1"
-                               Text="{Binding UpdateInfo.DisplayName}"
+                               Text="{Binding UpdateInfo.DisplayName, Mode=OneWay}"
                                TextTrimming="CharacterEllipsis" />
 
                     <TextBlock Grid.Row="1"
@@ -62,7 +62,7 @@
                     <TextBlock Grid.Row="1"
                                Grid.Column="1"
                                Margin="0,7,0,0"
-                               Text="{Binding UpdateInfo.AssetName}"
+                               Text="{Binding UpdateInfo.AssetName, Mode=OneWay}"
                                TextTrimming="CharacterEllipsis" />
 
                     <TextBlock Grid.Row="2"
@@ -72,7 +72,7 @@
                     <TextBlock Grid.Row="2"
                                Grid.Column="1"
                                Margin="0,7,0,0"
-                               Text="{Binding UpdateInfo.AssetSizeText}" />
+                               Text="{Binding UpdateInfo.AssetSizeText, Mode=OneWay}" />
                 </Grid>
             </Border>
 

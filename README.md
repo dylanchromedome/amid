@@ -15,7 +15,7 @@ https://github.com/dylanchromedome/amid/releases/latest
 2. Download the newest portable zip, for example:
 
 ```text
-AMID-portable-win-x64-v0.6.1.zip
+AMID-portable-win-x64-v0.8.0.zip
 ```
 
 3. Right-click the zip and choose `Extract All`.
@@ -115,6 +115,9 @@ Deleting that folder removes AMID's saved list and crash reports. It does not de
 - Pause only when the server supports HTTP range requests.
 - Retry paused or failed downloads.
 - Keep old rows separate after app restarts.
+- Close to the notification area instead of quitting.
+- Start with Windows and stay ready for Chrome downloads.
+- Show the AMID window when Chrome sends a download.
 - Show crash details in a popup if AMID hits an unexpected error.
 
 ## Troubleshooting

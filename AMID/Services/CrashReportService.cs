@@ -25,7 +25,7 @@ public static class CrashReportService
 
             var window = new CrashReportWindow(viewModel)
             {
-                Owner = Application.Current?.Windows
+                Owner = System.Windows.Application.Current?.Windows
                     .OfType<Window>()
                     .FirstOrDefault(window => window.IsActive)
             };
@@ -37,7 +37,7 @@ public static class CrashReportService
         }
         catch
         {
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"AMID hit an unexpected error. A crash report was saved here:{Environment.NewLine}{report.Path}",
                 "AMID Crash Report",
                 MessageBoxButton.OK,

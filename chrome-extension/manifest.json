@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AMID Chrome Integration",
   "description": "Sends Chrome HTTP and HTTPS downloads to AMID while the AMID app is running.",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "minimum_chrome_version": "96",
   "permissions": [
     "downloads"

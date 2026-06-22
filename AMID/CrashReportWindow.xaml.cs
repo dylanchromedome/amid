@@ -15,7 +15,7 @@ public partial class CrashReportWindow : Window
 
     private void Copy_Click(object sender, RoutedEventArgs e)
     {
-        Clipboard.SetText(ReportTextBox.Text);
+        System.Windows.Clipboard.SetText(ReportTextBox.Text);
     }
 
     private void Continue_Click(object sender, RoutedEventArgs e)

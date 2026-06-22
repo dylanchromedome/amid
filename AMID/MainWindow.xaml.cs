@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using Drawing = System.Drawing;
 using System.IO;
 using System.Net.Http;
 using System.Windows;
@@ -9,6 +10,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using AMID.Models;
 using AMID.Services;
+using Forms = System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace AMID;
 
@@ -17,17 +20,28 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private readonly DownloadService _downloadService = new();
     private readonly DownloadPersistenceService _persistenceService = new();
     private readonly GitHubUpdateService _updateService = new();
+    private readonly AppSettingsService _settingsService = new();
     private readonly Dictionary<DownloadItem, DownloadRunContext> _downloadContexts = new();
     private readonly DispatcherTimer _saveTimer;
+    private AppSettings _settings = new();
     private ChromeIntegrationServer? _chromeIntegrationServer;
+    private Forms.ContextMenuStrip? _trayMenu;
+    private Forms.NotifyIcon? _notifyIcon;
     private DownloadCategory? _selectedCategory;
     private DownloadItem? _selectedDownload;
     private int _activeDownloadCount;
     private bool _saveWarningShown;
     private bool _startupUpdateCheckStarted;
+    private bool _isExitRequested;
+    private bool _isSessionEnding;
+    private bool _startMinimizedToTray;
 
     public MainWindow()
     {
+        _settings = _settingsService.Load();
+        _startMinimizedToTray = Environment.GetCommandLineArgs()
+            .Any(argument => string.Equals(argument, "--minimized", StringComparison.OrdinalIgnoreCase));
+
         Downloads = new ObservableCollection<DownloadItem>();
         DownloadsView = CollectionViewSource.GetDefaultView(Downloads);
         DownloadsView.Filter = FilterDownload;
@@ -63,6 +77,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         InitializeComponent();
         DataContext = this;
         Loaded += MainWindow_Loaded;
+        SystemEvents.SessionEnding += SystemEvents_SessionEnding;
+        ConfigureTrayIcon();
+        ApplyStartupRegistration();
         StartChromeIntegrationServer();
     }
 
@@ -85,6 +102,55 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     public string ChromeIntegrationText => _chromeIntegrationServer?.IsRunning == true
         ? $"Chrome: listening on 127.0.0.1:{ChromeIntegrationServer.Port}"
         : "Chrome: not connected";
+
+    public bool CloseToTray
+    {
+        get => _settings.CloseToTray;
+        set
+        {
+            if (_settings.CloseToTray == value)
+            {
+                return;
+            }
+
+            _settings.CloseToTray = value;
+            SaveSettings();
+            OnPropertyChanged(nameof(CloseToTray));
+        }
+    }
+
+    public bool ShowOnChromeDownload
+    {
+        get => _settings.ShowOnChromeDownload;
+        set
+        {
+            if (_settings.ShowOnChromeDownload == value)
+            {
+                return;
+            }
+
+            _settings.ShowOnChromeDownload = value;
+            SaveSettings();
+            OnPropertyChanged(nameof(ShowOnChromeDownload));
+        }
+    }
+
+    public bool StartWithWindows
+    {
+        get => _settings.StartWithWindows;
+        set
+        {
+            if (_settings.StartWithWindows == value)
+            {
+                return;
+            }
+
+            _settings.StartWithWindows = value;
+            ApplyStartupRegistration();
+            SaveSettings();
+            OnPropertyChanged(nameof(StartWithWindows));
+        }
+    }
 
     public DownloadCategory? SelectedCategory
     {
@@ -121,6 +187,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     protected override void OnClosing(CancelEventArgs e)
     {
+        if (!_isExitRequested && !_isSessionEnding && CloseToTray)
+        {
+            e.Cancel = true;
+            HideToTray(showBalloon: true);
+            return;
+        }
+
         _saveTimer.Stop();
 
         foreach ((DownloadItem item, DownloadRunContext context) in _downloadContexts.ToArray())
@@ -143,6 +216,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         _chromeIntegrationServer?.Stop();
+        DisposeTrayIcon();
+        SystemEvents.SessionEnding -= SystemEvents_SessionEnding;
         SaveDownloads();
         base.OnClosing(e);
     }
@@ -154,6 +229,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_startMinimizedToTray)
+        {
+            HideToTray(showBalloon: false);
+            return;
+        }
+
         if (_startupUpdateCheckStarted)
         {
             return;
@@ -163,7 +244,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _ = CheckForUpdatesAsync(showNoUpdateMessage: false);
     }
 
-    private void UrlTextBox_KeyDown(object sender, KeyEventArgs e)
+    private void UrlTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key != Key.Enter)
         {
@@ -262,6 +343,75 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _ = CheckForUpdatesAsync(showNoUpdateMessage: true);
     }
 
+    private void ConfigureTrayIcon()
+    {
+        _trayMenu = new Forms.ContextMenuStrip();
+        _trayMenu.Items.Add("Open AMID", null, (_, _) => Dispatcher.Invoke(ShowFromTray));
+        _trayMenu.Items.Add(new Forms.ToolStripSeparator());
+        _trayMenu.Items.Add("Exit", null, (_, _) => Dispatcher.Invoke(ExitApplication));
+
+        _notifyIcon = new Forms.NotifyIcon
+        {
+            ContextMenuStrip = _trayMenu,
+            Icon = GetTrayIcon(),
+            Text = "AMID",
+            Visible = true
+        };
+        _notifyIcon.DoubleClick += (_, _) => Dispatcher.Invoke(ShowFromTray);
+    }
+
+    private static Drawing.Icon GetTrayIcon()
+    {
+        return !string.IsNullOrWhiteSpace(Environment.ProcessPath) && File.Exists(Environment.ProcessPath)
+            ? Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath) ?? Drawing.SystemIcons.Application
+            : Drawing.SystemIcons.Application;
+    }
+
+    private void HideToTray(bool showBalloon)
+    {
+        Hide();
+
+        if (showBalloon && _notifyIcon is not null)
+        {
+            _notifyIcon.BalloonTipTitle = "AMID is still running";
+            _notifyIcon.BalloonTipText = "Right-click the AMID tray icon and choose Exit to close it.";
+            _notifyIcon.ShowBalloonTip(2500);
+        }
+    }
+
+    private void ShowFromTray()
+    {
+        Show();
+        if (WindowState == WindowState.Minimized)
+        {
+            WindowState = WindowState.Normal;
+        }
+
+        Activate();
+        Topmost = true;
+        Topmost = false;
+        Focus();
+    }
+
+    private void ExitApplication()
+    {
+        _isExitRequested = true;
+        Close();
+    }
+
+    private void DisposeTrayIcon()
+    {
+        if (_notifyIcon is not null)
+        {
+            _notifyIcon.Visible = false;
+            _notifyIcon.Dispose();
+            _notifyIcon = null;
+        }
+
+        _trayMenu?.Dispose();
+        _trayMenu = null;
+    }
+
     private async Task CheckForUpdatesAsync(bool showNoUpdateMessage)
     {
         try
@@ -273,7 +423,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 AddLog("No AMID update found.");
                 if (showNoUpdateMessage)
                 {
-                    MessageBox.Show(
+                    System.Windows.MessageBox.Show(
                         this,
                         $"AMID { _updateService.CurrentVersionText } is up to date.",
                         "AMID Updates",
@@ -296,7 +446,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             }
 
             AddLog($"Downloading update {updateInfo.TagName}.");
-            Mouse.OverrideCursor = Cursors.Wait;
+            Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
             string zipPath = await _updateService.DownloadUpdateAsync(
                 updateInfo,
                 progress: null,
@@ -306,7 +456,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             AddLog($"Downloaded update package {updateInfo.AssetName}.");
             _updateService.LaunchUpdater(zipPath, Environment.ProcessId);
             AddLog("Updater launched. AMID will close and reopen after the update.");
-            Application.Current.Shutdown();
+            _isExitRequested = true;
+            System.Windows.Application.Current.Shutdown();
         }
         catch (Exception ex)
         {
@@ -314,7 +465,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             AddLog($"Update check failed: {ex.Message}");
             if (showNoUpdateMessage)
             {
-                MessageBox.Show(
+                System.Windows.MessageBox.Show(
                     this,
                     $"Could not check for updates:\n\n{ex.Message}",
                     "AMID Updates",
@@ -590,6 +741,35 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
+    private void SaveSettings()
+    {
+        try
+        {
+            _settingsService.Save(_settings);
+        }
+        catch (Exception ex)
+        {
+            AddLog($"Could not save settings: {ex.Message}");
+        }
+    }
+
+    private void ApplyStartupRegistration()
+    {
+        try
+        {
+            StartupRegistrationService.SetStartWithWindows(StartWithWindows);
+        }
+        catch (Exception ex)
+        {
+            AddLog($"Could not update Windows startup setting: {ex.Message}");
+        }
+    }
+
+    private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+    {
+        _isSessionEnding = true;
+    }
+
     private bool FilterDownload(object item)
     {
         return item is DownloadItem download
@@ -658,6 +838,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     request.Filename,
                     request.Mime);
                 DownloadItem item = AddDownloadFromUrl(url, "Chrome sent", preferredFileName);
+                if (ShowOnChromeDownload)
+                {
+                    ShowFromTray();
+                }
+
                 return ChromeDownloadBridgeResult.CreateAccepted(item.FileName);
             },
             DispatcherPriority.Normal,

@@ -4,58 +4,173 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="AMID - Download Manager"
-        Width="1220"
-        Height="760"
-        MinWidth="1020"
-        MinHeight="620"
-        Background="#F1F3F5"
+        Width="1260"
+        Height="780"
+        MinWidth="1060"
+        MinHeight="640"
+        Background="#000000"
         FontFamily="Segoe UI"
         FontSize="12"
+        Icon="Assets/V3favicon.ico"
         mc:Ignorable="d">
     <Window.Resources>
-        <SolidColorBrush x:Key="BorderBrush" Color="#CDD3DA" />
-        <SolidColorBrush x:Key="HeaderBrush" Color="#F6F7F9" />
-        <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="SelectionBrush" Color="#DCEBFF" />
-        <SolidColorBrush x:Key="SelectionBorderBrush" Color="#8BB8F7" />
+        <SolidColorBrush x:Key="ThemeBlackBrush" Color="#000000" />
+        <SolidColorBrush x:Key="ThemeBlueBrush" Color="#4200FF" />
+        <SolidColorBrush x:Key="ThemePinkBrush" Color="#FF006B" />
+        <SolidColorBrush x:Key="ThemeWhiteBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ThemeMutedBrush" Color="#B8B8B8" />
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#0B0B0E" />
+        <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#15151A" />
+        <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#1F1F27" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#2B2B35" />
+        <SolidColorBrush x:Key="GridLineBrush" Color="#24242C" />
+        <SolidColorBrush x:Key="SelectionBrush" Color="#201252" />
+        <SolidColorBrush x:Key="SelectionBorderBrush" Color="#4200FF" />
 
         <Style x:Key="ToolbarButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="84" />
-            <Setter Property="Height" Value="30" />
+            <Setter Property="MinWidth" Value="86" />
+            <Setter Property="Height" Value="31" />
             <Setter Property="Padding" Value="10,4" />
             <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
+            <Setter Property="Background" Value="{StaticResource SurfaceRaisedBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource ThemeBlueBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ThemeBlueBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource ThemeBlueBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.42" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryToolbarButtonStyle"
+               BasedOn="{StaticResource ToolbarButtonStyle}"
+               TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ThemeBlueBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ThemeBlueBrush}" />
         </Style>
 
         <Style x:Key="ToolbarIconStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
+        <Style TargetType="ToolBar">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolBar">
+                        <Border Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ToolBarPanel IsItemsHost="True" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Separator">
+            <Setter Property="Width" Value="1" />
+            <Setter Property="Margin" Value="4,4,10,4" />
+            <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Separator">
+                        <Border Width="{TemplateBinding Width}"
+                                Background="{TemplateBinding Background}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="SidebarListBoxItemStyle" TargetType="ListBoxItem">
-            <Setter Property="Margin" Value="6,1" />
-            <Setter Property="Padding" Value="9,7" />
+            <Setter Property="Margin" Value="6,2" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Background" Value="Transparent" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#EEF3FA" />
-                    <Setter Property="BorderBrush" Value="#D5DEE9" />
+                    <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#DCEBFF" />
-                    <Setter Property="BorderBrush" Value="#8BB8F7" />
+                    <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource ThemeBlueBrush}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="DarkTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#050507" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
+            <Setter Property="CaretBrush" Value="{StaticResource ThemePinkBrush}" />
+            <Setter Property="SelectionBrush" Value="{StaticResource ThemeBlueBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="TextBoxBorder"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TextBoxBorder" Property="BorderBrush" Value="{StaticResource ThemeBlueBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="TextBoxBorder" Property="BorderBrush" Value="{StaticResource ThemePinkBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{StaticResource HeaderBrush}" />
-            <Setter Property="BorderBrush" Value="#CDD3DA" />
+            <Setter Property="Background" Value="#101015" />
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="0,0,1,1" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Padding" Value="8,7" />
@@ -63,113 +178,220 @@
 
         <Style TargetType="DataGridCell">
             <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
             <Setter Property="Padding" Value="8,5" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Foreground" Value="#111827" />
+                    <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style TargetType="DataGridRow">
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Background" Value="#0B0B0E" />
             <Style.Triggers>
                 <Trigger Property="AlternationIndex" Value="1">
-                    <Setter Property="Background" Value="#FAFBFC" />
+                    <Setter Property="Background" Value="#101015" />
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#EEF6FF" />
+                    <Setter Property="Background" Value="#181822" />
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
-                    <Setter Property="BorderBrush" Value="{StaticResource SelectionBorderBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource ThemePinkBrush}" />
                     <Setter Property="BorderThickness" Value="0,1,0,1" />
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{StaticResource ThemeMutedBrush}" />
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Margin" Value="0,0,3,0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder"
+                                Margin="{TemplateBinding Margin}"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                            <ContentPresenter ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource ThemeBlueBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource ThemeWhiteBrush}" />
+                                <Setter TargetName="TabBorder" Property="Background" Value="{StaticResource SurfaceRaisedBrush}" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource ThemePinkBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
-    <DockPanel>
+    <DockPanel LastChildFill="True">
         <Border DockPanel.Dock="Top"
-                Background="#F8F9FB"
+                Background="{StaticResource ThemeBlackBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,0,0,1">
-            <ToolBarTray Background="#F8F9FB">
-                <ToolBar Padding="8,6"
-                         Background="#F8F9FB"
-                         BorderThickness="0"
-                         ClipToBounds="False">
-                    <TextBlock Margin="0,0,8,0"
-                               VerticalAlignment="Center"
-                               Foreground="#374151"
-                               Text="URL" />
-                    <TextBox x:Name="UrlTextBox"
-                             Width="470"
-                             Height="30"
-                             Margin="0,0,8,0"
-                             Padding="7,4"
-                             VerticalContentAlignment="Center"
-                             KeyDown="UrlTextBox_KeyDown"
-                             ToolTip="HTTP or HTTPS download URL" />
-                    <Button Click="AddDownload_Click" Style="{StaticResource ToolbarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE710;" />
-                            <TextBlock VerticalAlignment="Center" Text="Add" />
-                        </StackPanel>
-                    </Button>
-                    <Separator />
-                    <Button Click="PauseSelected_Click"
-                            IsEnabled="{Binding SelectedDownload.CanPause}"
-                            Style="{StaticResource ToolbarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE769;" />
-                            <TextBlock VerticalAlignment="Center" Text="Pause" />
-                        </StackPanel>
-                    </Button>
-                    <Button Click="RetrySelected_Click"
-                            IsEnabled="{Binding SelectedDownload.CanRetry}"
-                            Style="{StaticResource ToolbarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE768;" />
-                            <TextBlock VerticalAlignment="Center" Text="Retry" />
-                        </StackPanel>
-                    </Button>
-                    <Button Click="CancelSelected_Click"
-                            IsEnabled="{Binding SelectedDownload.CanCancel}"
-                            Style="{StaticResource ToolbarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
-                            <TextBlock VerticalAlignment="Center" Text="Cancel" />
-                        </StackPanel>
-                    </Button>
-                    <Separator />
-                    <Button Click="OpenFolder_Click"
-                            MinWidth="112"
-                            Style="{StaticResource ToolbarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE838;" />
-                            <TextBlock VerticalAlignment="Center" Text="Open Folder" />
-                        </StackPanel>
-                    </Button>
-                    <Button Click="CheckUpdates_Click"
-                            MinWidth="98"
-                            Style="{StaticResource ToolbarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE895;" />
-                            <TextBlock VerticalAlignment="Center" Text="Updates" />
-                        </StackPanel>
-                    </Button>
-                </ToolBar>
-            </ToolBarTray>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="58" />
+                    <RowDefinition Height="46" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="12,8,12,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="40"
+                            Height="40"
+                            Background="{StaticResource SurfaceRaisedBrush}"
+                            BorderBrush="{StaticResource ThemeBlueBrush}"
+                            BorderThickness="1">
+                        <Image Width="28"
+                               Height="28"
+                               Source="Assets/V3favicon.png"
+                               Stretch="Uniform" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1"
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center">
+                        <TextBlock Foreground="{StaticResource ThemeWhiteBrush}"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Text="AMID" />
+                        <TextBlock Foreground="{StaticResource ThemeMutedBrush}"
+                                   FontSize="11"
+                                   Text="HTTP and HTTPS download manager" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                        <Border Margin="0,0,8,0"
+                                Padding="9,4"
+                                Background="#111116"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1">
+                            <TextBlock Foreground="{StaticResource ThemeMutedBrush}"
+                                       Text="{Binding ActiveDownloadsText}" />
+                        </Border>
+                        <Border Padding="9,4"
+                                Background="#15000A"
+                                BorderBrush="{StaticResource ThemePinkBrush}"
+                                BorderThickness="1">
+                            <TextBlock Foreground="{StaticResource ThemeWhiteBrush}"
+                                       Text="{Binding ChromeIntegrationText}" />
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <ToolBarTray Grid.Row="1"
+                             Background="{StaticResource SurfaceBrush}">
+                    <ToolBar Padding="10,7"
+                             Background="{StaticResource SurfaceBrush}"
+                             BorderBrush="{StaticResource BorderBrush}"
+                             BorderThickness="0,1,0,0"
+                             ClipToBounds="False">
+                        <TextBlock Margin="0,0,8,0"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource ThemeMutedBrush}"
+                                   FontWeight="SemiBold"
+                                   Text="URL" />
+                        <TextBox x:Name="UrlTextBox"
+                                 Width="500"
+                                 Height="30"
+                                 Margin="0,0,8,0"
+                                 Padding="8,4"
+                                 Style="{StaticResource DarkTextBoxStyle}"
+                                 VerticalContentAlignment="Center"
+                                 KeyDown="UrlTextBox_KeyDown"
+                                 ToolTip="HTTP or HTTPS download URL" />
+                        <Button Click="AddDownload_Click" Style="{StaticResource PrimaryToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE710;" />
+                                <TextBlock VerticalAlignment="Center" Text="Add" />
+                            </StackPanel>
+                        </Button>
+                        <Separator />
+                        <Button Click="PauseSelected_Click"
+                                IsEnabled="{Binding SelectedDownload.CanPause}"
+                                Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE769;" />
+                                <TextBlock VerticalAlignment="Center" Text="Pause" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="RetrySelected_Click"
+                                IsEnabled="{Binding SelectedDownload.CanRetry}"
+                                Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE768;" />
+                                <TextBlock VerticalAlignment="Center" Text="Retry" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="CancelSelected_Click"
+                                IsEnabled="{Binding SelectedDownload.CanCancel}"
+                                Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                                <TextBlock VerticalAlignment="Center" Text="Cancel" />
+                            </StackPanel>
+                        </Button>
+                        <Separator />
+                        <Button Click="OpenFolder_Click"
+                                MinWidth="112"
+                                Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE838;" />
+                                <TextBlock VerticalAlignment="Center" Text="Open Folder" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="CheckUpdates_Click"
+                                MinWidth="98"
+                                Style="{StaticResource ToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE895;" />
+                                <TextBlock VerticalAlignment="Center" Text="Updates" />
+                            </StackPanel>
+                        </Button>
+                    </ToolBar>
+                </ToolBarTray>
+            </Grid>
         </Border>
 
         <StatusBar DockPanel.Dock="Bottom"
-                   Background="#F8F9FB"
+                   Background="{StaticResource ThemeBlackBrush}"
                    BorderBrush="{StaticResource BorderBrush}"
-                   BorderThickness="0,1,0,0">
+                   BorderThickness="0,1,0,0"
+                   Foreground="{StaticResource ThemeMutedBrush}">
             <StatusBarItem Content="{Binding TotalDownloadsText}" />
             <Separator />
             <StatusBarItem Content="{Binding ActiveDownloadsText}" />
@@ -179,34 +401,43 @@
             <StatusBarItem Content="{Binding ChromeIntegrationText}" />
         </StatusBar>
 
-        <Grid Margin="8">
+        <Grid Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="178" MinWidth="150" />
-                <ColumnDefinition Width="7" />
+                <ColumnDefinition Width="190" MinWidth="170" />
+                <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" MinHeight="310" />
-                <RowDefinition Height="7" />
-                <RowDefinition Height="190" MinHeight="150" />
+                <RowDefinition Height="*" MinHeight="330" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="215" MinHeight="170" />
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0"
                     Grid.Column="0"
                     Grid.RowSpan="3"
-                    Background="{StaticResource PanelBrush}"
+                    Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1">
                 <DockPanel>
                     <Border DockPanel.Dock="Top"
-                            Padding="11,9"
-                            Background="{StaticResource HeaderBrush}"
+                            Padding="12,10"
+                            Background="{StaticResource SurfaceRaisedBrush}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="0,0,0,1">
-                        <TextBlock FontWeight="SemiBold" Text="Downloads" />
+                        <StackPanel>
+                            <TextBlock Foreground="{StaticResource ThemeWhiteBrush}"
+                                       FontWeight="SemiBold"
+                                       Text="Downloads" />
+                            <TextBlock Margin="0,2,0,0"
+                                       Foreground="{StaticResource ThemeMutedBrush}"
+                                       FontSize="11"
+                                       Text="Queue categories" />
+                        </StackPanel>
                     </Border>
                     <ListBox BorderThickness="0"
                              Background="Transparent"
+                             Foreground="{StaticResource ThemeWhiteBrush}"
                              ItemContainerStyle="{StaticResource SidebarListBoxItemStyle}"
                              ItemsSource="{Binding Categories}"
                              SelectedItem="{Binding SelectedCategory, Mode=TwoWay}">
@@ -217,16 +448,19 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
+                                    <TextBlock VerticalAlignment="Center"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                               Text="{Binding Title}" />
                                     <Border Grid.Column="1"
-                                            MinWidth="26"
-                                            Padding="5,1"
+                                            MinWidth="28"
+                                            Padding="6,1"
                                             HorizontalAlignment="Right"
-                                            Background="#EDF1F5"
-                                            BorderBrush="#D1D7DE"
+                                            Background="#050507"
+                                            BorderBrush="{StaticResource ThemePinkBrush}"
                                             BorderThickness="1">
                                         <TextBlock HorizontalAlignment="Center"
                                                    FontSize="11"
+                                                   Foreground="{StaticResource ThemeWhiteBrush}"
                                                    Text="{Binding Count}" />
                                     </Border>
                                 </Grid>
@@ -239,43 +473,50 @@
             <GridSplitter Grid.Row="0"
                           Grid.Column="1"
                           Grid.RowSpan="3"
-                          Width="7"
+                          Width="8"
                           HorizontalAlignment="Stretch"
-                          Background="#E5E9EF"
+                          Background="{StaticResource ThemeBlackBrush}"
                           ResizeBehavior="PreviousAndNext" />
 
             <Border Grid.Row="0"
                     Grid.Column="2"
-                    Background="{StaticResource PanelBrush}"
+                    Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1">
                 <DataGrid AlternationCount="2"
                           AutoGenerateColumns="False"
+                          Background="{StaticResource SurfaceBrush}"
+                          BorderThickness="0"
                           CanUserAddRows="False"
                           CanUserDeleteRows="False"
                           EnableRowVirtualization="True"
+                          Foreground="{StaticResource ThemeWhiteBrush}"
                           GridLinesVisibility="Horizontal"
                           HeadersVisibility="Column"
-                          HorizontalGridLinesBrush="#E7EAEE"
+                          HorizontalGridLinesBrush="{StaticResource GridLineBrush}"
                           IsReadOnly="True"
                           ItemsSource="{Binding DownloadsView}"
                           RowHeaderWidth="0"
                           SelectedItem="{Binding SelectedDownload, Mode=TwoWay}"
                           SelectionMode="Single">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Width="210" Binding="{Binding FileName}" Header="Name" />
-                        <DataGridTextColumn Width="*" MinWidth="260" Binding="{Binding Url}" Header="URL" />
-                        <DataGridTemplateColumn Width="150" Header="Progress">
+                        <DataGridTextColumn Width="220" Binding="{Binding FileName}" Header="Name" />
+                        <DataGridTextColumn Width="*" MinWidth="275" Binding="{Binding Url}" Header="URL" />
+                        <DataGridTemplateColumn Width="155" Header="Progress">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid Height="18" Margin="2,0">
                                         <ProgressBar Maximum="100"
                                                      Minimum="0"
+                                                     Background="#050507"
+                                                     BorderBrush="{StaticResource BorderBrush}"
+                                                     Foreground="{StaticResource ThemeBlueBrush}"
                                                      Value="{Binding ProgressPercent, Mode=OneWay}" />
                                         <TextBlock HorizontalAlignment="Center"
                                                    VerticalAlignment="Center"
                                                    FontSize="11"
-                                                   Foreground="#111827"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource ThemeWhiteBrush}"
                                                    Text="{Binding ProgressText}" />
                                     </Grid>
                                 </DataTemplate>
@@ -286,60 +527,60 @@
                         <DataGridTextColumn Width="100" Binding="{Binding Speed}" Header="Speed" />
                         <DataGridTextColumn Width="82" Binding="{Binding Eta}" Header="ETA" />
                         <DataGridTextColumn Width="82" Binding="{Binding ResumeSupportText}" Header="Range" />
-                        <DataGridTemplateColumn Width="150" Header="Status">
+                        <DataGridTemplateColumn Width="160" Header="Status">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border x:Name="StatusBadge"
                                             Padding="7,2"
                                             HorizontalAlignment="Left"
-                                            Background="#EEF2F7"
-                                            BorderBrush="#CBD5E1"
+                                            Background="#14141A"
+                                            BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <TextBlock x:Name="StatusText"
                                                    FontSize="11"
-                                                   Foreground="#374151"
+                                                   Foreground="{StaticResource ThemeMutedBrush}"
                                                    Text="{Binding Status}" />
                                     </Border>
                                     <DataTemplate.Triggers>
                                         <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#E7F5EC" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#9BD4AE" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#176B3A" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#09130D" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#2ED16C" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#FFFFFF" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Downloading">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#E8F1FF" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#98BFF5" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#1B5CA8" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#140A3D" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#4200FF" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#FFFFFF" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Downloading (no resume)">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#F0ECFF" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#B6A7F0" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#5945A8" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#1D102D" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FF006B" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#FFFFFF" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Retrying">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#E8F1FF" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#98BFF5" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#1B5CA8" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#140A3D" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#4200FF" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#FFFFFF" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Paused">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#FFF4D8" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#E7C15F" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#7A5600" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#1C1A10" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#B8B8B8" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#FFFFFF" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Failed">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#FDECEC" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#F2A3A3" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#9A1C1C" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#2B0012" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FF006B" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#FFFFFF" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Resume not supported">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#FDECEC" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#F2A3A3" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#9A1C1C" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#2B0012" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#FF006B" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#FFFFFF" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Canceled">
-                                            <Setter TargetName="StatusBadge" Property="Background" Value="#F1F3F5" />
-                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#C9CED6" />
-                                            <Setter TargetName="StatusText" Property="Foreground" Value="#58606B" />
+                                            <Setter TargetName="StatusBadge" Property="Background" Value="#101015" />
+                                            <Setter TargetName="StatusBadge" Property="BorderBrush" Value="#B8B8B8" />
+                                            <Setter TargetName="StatusText" Property="Foreground" Value="#B8B8B8" />
                                         </DataTrigger>
                                     </DataTemplate.Triggers>
                                 </DataTemplate>
@@ -351,18 +592,18 @@
 
             <GridSplitter Grid.Row="1"
                           Grid.Column="2"
-                          Height="7"
+                          Height="8"
                           HorizontalAlignment="Stretch"
-                          Background="#E5E9EF"
+                          Background="{StaticResource ThemeBlackBrush}"
                           ResizeBehavior="PreviousAndNext" />
 
             <Border Grid.Row="2"
                     Grid.Column="2"
-                    Background="{StaticResource PanelBrush}"
+                    Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1">
                 <TabControl BorderThickness="0"
-                            Background="{StaticResource PanelBrush}"
+                            Background="{StaticResource SurfaceBrush}"
                             Padding="0">
                     <TabItem Header="General">
                         <Grid Margin="12,10">
@@ -379,36 +620,19 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Text="Selected" />
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="1"
-                                       Text="{Binding SelectedDownload.FileName, TargetNullValue='No download selected'}"
-                                       TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Row="0" Grid.Column="2" FontWeight="SemiBold" Text="Status" />
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="3"
-                                       Text="{Binding SelectedDownload.Status, TargetNullValue='--'}" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Selected" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.FileName, TargetNullValue='No download selected'}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Status" />
+                            <TextBlock Grid.Row="0" Grid.Column="3" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.Status, TargetNullValue='--'}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Text="Save path" />
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="3"
-                                       Text="{Binding SelectedDownload.DestinationPath, TargetNullValue='--'}"
-                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Save path" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.DestinationPath, TargetNullValue='--'}" TextTrimming="CharacterEllipsis" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" Text="Source URL" />
-                            <TextBlock Grid.Row="2"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="3"
-                                       Text="{Binding SelectedDownload.Url, TargetNullValue='--'}"
-                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Source URL" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.Url, TargetNullValue='--'}" TextTrimming="CharacterEllipsis" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="SemiBold" Text="Error" />
-                            <TextBlock Grid.Row="3"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="3"
-                                       Text="{Binding SelectedDownload.ErrorMessage, TargetNullValue='--'}"
-                                       TextWrapping="Wrap" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Error" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.ErrorMessage, TargetNullValue='--'}" TextWrapping="Wrap" />
                         </Grid>
                     </TabItem>
                     <TabItem Header="Transfer">
@@ -426,41 +650,46 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Text="Downloaded" />
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="1"
-                                       Text="{Binding SelectedDownload.DownloadedSize, TargetNullValue='--'}" />
-                            <TextBlock Grid.Row="0" Grid.Column="2" FontWeight="SemiBold" Text="Size" />
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="3"
-                                       Text="{Binding SelectedDownload.TotalSize, TargetNullValue='--'}" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Downloaded" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.DownloadedSize, TargetNullValue='--'}" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Size" />
+                            <TextBlock Grid.Row="0" Grid.Column="3" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.TotalSize, TargetNullValue='--'}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Text="Speed" />
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="1"
-                                       Text="{Binding SelectedDownload.Speed, TargetNullValue='--'}" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="ETA" />
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="3"
-                                       Text="{Binding SelectedDownload.Eta, TargetNullValue='--'}" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Speed" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.Speed, TargetNullValue='--'}" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="ETA" />
+                            <TextBlock Grid.Row="1" Grid.Column="3" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.Eta, TargetNullValue='--'}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" Text="Range support" />
-                            <TextBlock Grid.Row="2"
-                                       Grid.Column="1"
-                                       Text="{Binding SelectedDownload.ResumeSupportText, TargetNullValue='--'}" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" FontWeight="SemiBold" Text="Chrome bridge" />
-                            <TextBlock Grid.Row="2"
-                                       Grid.Column="3"
-                                       Text="{Binding ChromeIntegrationText}" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Range support" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding SelectedDownload.ResumeSupportText, TargetNullValue='--'}" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Foreground="{StaticResource ThemeWhiteBrush}" FontWeight="SemiBold" Text="Chrome bridge" />
+                            <TextBlock Grid.Row="2" Grid.Column="3" Foreground="{StaticResource ThemeMutedBrush}" Text="{Binding ChromeIntegrationText}" />
                         </Grid>
+                    </TabItem>
+                    <TabItem Header="Options">
+                        <StackPanel Margin="12,10">
+                            <CheckBox Margin="0,0,0,8"
+                                      FontSize="12"
+                                      IsChecked="{Binding CloseToTray, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Content="Close to tray" />
+                            <CheckBox Margin="0,0,0,8"
+                                      FontSize="12"
+                                      IsChecked="{Binding ShowOnChromeDownload, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Content="Show on Chrome download" />
+                            <CheckBox Margin="0,0,0,8"
+                                      FontSize="12"
+                                      IsChecked="{Binding StartWithWindows, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Content="Start with Windows" />
+                        </StackPanel>
                     </TabItem>
                     <TabItem Header="Log">
                         <ListBox Margin="0"
-                                 Padding="6"
-                                 Background="{StaticResource PanelBrush}"
+                                 Padding="8"
+                                 Background="{StaticResource SurfaceBrush}"
                                  BorderThickness="0"
                                  FontFamily="Consolas"
                                  FontSize="12"
+                                 Foreground="{StaticResource ThemeMutedBrush}"
                                  ItemsSource="{Binding LogEntries}" />
                     </TabItem>
                 </TabControl>
