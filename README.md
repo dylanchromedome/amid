@@ -13,7 +13,7 @@ https://github.com/dylanchromedome/amid/releases/latest
 2. Download the newest zip, named like:
 
 ```text
-AMID-portable-win-x64-v0.9.1.zip
+AMID-portable-win-x64-v0.9.2.zip
 ```
 
 3. Right-click the zip and choose `Extract All`.
@@ -32,15 +32,16 @@ install.exe
 1. Start AMID.
 2. In AMID, open the `Options` tab.
 3. Click `Copy Path` or `Open Folder` under `Chrome extension`.
-4. Open Chrome and go to:
+4. Click `Copy Chrome URL`.
+5. Open Chrome and paste this into the address bar:
 
 ```text
 chrome://extensions
 ```
 
-5. Enable `Developer mode`.
-6. Click `Load unpacked`.
-7. Select the AMID Chrome extension folder.
+6. Enable `Developer mode`.
+7. Click `Load unpacked`.
+8. Select the AMID Chrome extension folder.
 
 If AMID is installed normally, the folder is:
 

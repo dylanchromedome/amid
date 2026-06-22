@@ -8,7 +8,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>AMID</AssemblyName>
     <ApplicationIcon>Assets\V3favicon.ico</ApplicationIcon>
-    <Version>0.9.1</Version>
+    <Version>0.9.2</Version>
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="Assets\V3favicon.png" />

@@ -6,13 +6,41 @@ namespace AMID;
 
 public partial class App : System.Windows.Application
 {
+    private SingleInstanceService? _singleInstanceService;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         DispatcherUnhandledException += App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
+        _singleInstanceService = new SingleInstanceService();
+        if (!_singleInstanceService.TryAcquire())
+        {
+            SingleInstanceService.SignalExistingInstance();
+            Shutdown(0);
+            return;
+        }
+
         base.OnStartup(e);
+
+        var mainWindow = new MainWindow();
+        MainWindow = mainWindow;
+        _singleInstanceService.ActivationRequested += () =>
+        {
+            Dispatcher.BeginInvoke(mainWindow.ShowFromExternalActivation);
+        };
+        _singleInstanceService.StartActivationListener();
+        mainWindow.Show();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _singleInstanceService?.Dispose();
+        DispatcherUnhandledException -= App_DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+        TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+        base.OnExit(e);
     }
 
     private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

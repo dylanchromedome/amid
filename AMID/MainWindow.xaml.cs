@@ -389,42 +389,28 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         AddLog("Opened Chrome extension folder.");
     }
 
-    private void OpenChromeExtensionsPage_Click(object sender, RoutedEventArgs e)
+    private void CopyChromeExtensionsAddress_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "chrome.exe",
-                Arguments = "chrome://extensions",
-                UseShellExecute = true
-            });
-            AddLog("Opened Chrome extensions page.");
+            System.Windows.Clipboard.SetText("chrome://extensions");
+            AddLog("Copied chrome://extensions.");
+            System.Windows.MessageBox.Show(
+                this,
+                "Copied chrome://extensions.\n\nPaste it into Chrome's address bar to open the extensions page.",
+                "AMID Chrome Extension",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
-        catch (Exception chromeException)
+        catch (Exception ex)
         {
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "chrome://extensions",
-                    UseShellExecute = true
-                });
-                AddLog("Asked Windows to open chrome://extensions.");
-            }
-            catch (Exception fallbackException)
-            {
-                AddLog($"Could not open Chrome extensions page: {fallbackException.Message}");
-                System.Windows.MessageBox.Show(
-                    this,
-                    "Could not open Chrome automatically.\n\n" +
-                    "Open Chrome manually and go to chrome://extensions.\n\n" +
-                    $"Chrome launch error: {chromeException.Message}\n" +
-                    $"Fallback error: {fallbackException.Message}",
-                    "AMID Chrome Extension",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-            }
+            AddLog($"Could not copy chrome://extensions: {ex.Message}");
+            System.Windows.MessageBox.Show(
+                this,
+                "Could not copy chrome://extensions.\n\nOpen Chrome manually and go to chrome://extensions.",
+                "AMID Chrome Extension",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
         }
     }
 
@@ -476,6 +462,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Topmost = true;
         Topmost = false;
         Focus();
+    }
+
+    public void ShowFromExternalActivation()
+    {
+        ShowFromTray();
+        AddLog("Existing AMID window opened from a second launch request.");
     }
 
     private void ExitApplication()

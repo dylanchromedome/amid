@@ -708,12 +708,12 @@
                                         <TextBlock VerticalAlignment="Center" Text="Open Folder" />
                                     </StackPanel>
                                 </Button>
-                                <Button Click="OpenChromeExtensionsPage_Click"
-                                        MinWidth="146"
+                                <Button Click="CopyChromeExtensionsAddress_Click"
+                                        MinWidth="148"
                                         Style="{StaticResource ToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE774;" />
-                                        <TextBlock VerticalAlignment="Center" Text="Chrome Page" />
+                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8C8;" />
+                                        <TextBlock VerticalAlignment="Center" Text="Copy Chrome URL" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>

@@ -84,9 +84,9 @@ internal sealed class ChromeExtensionInstructionsForm : Forms.Form
         var openChromeButton = new Forms.Button
         {
             AutoSize = true,
-            Text = "Open Chrome extensions"
+            Text = "Copy chrome:// URL"
         };
-        openChromeButton.Click += (_, _) => OpenChromeExtensions();
+        openChromeButton.Click += (_, _) => CopyChromeExtensionsAddress();
 
         buttonPanel.Controls.Add(copyButton);
         buttonPanel.Controls.Add(openFolderButton);
@@ -158,41 +158,23 @@ internal sealed class ChromeExtensionInstructionsForm : Forms.Form
         _statusLabel.Text = "Opened the Chrome extension folder.";
     }
 
-    private void OpenChromeExtensions()
+    private void CopyChromeExtensionsAddress()
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "chrome.exe",
-                Arguments = "chrome://extensions",
-                UseShellExecute = true
-            });
-            _statusLabel.Text = "Opened Chrome extensions.";
+            Forms.Clipboard.SetText("chrome://extensions");
+            _statusLabel.Text = "Copied chrome://extensions. Paste it into Chrome's address bar.";
         }
-        catch (Exception chromeException)
+        catch (Exception ex)
         {
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "chrome://extensions",
-                    UseShellExecute = true
-                });
-                _statusLabel.Text = "Asked Windows to open chrome://extensions.";
-            }
-            catch (Exception fallbackException)
-            {
-                Forms.MessageBox.Show(
-                    this,
-                    "Could not open Chrome automatically.\r\n\r\n" +
-                    "Open Chrome manually and go to chrome://extensions.\r\n\r\n" +
-                    $"Chrome launch error: {chromeException.Message}\r\n" +
-                    $"Fallback error: {fallbackException.Message}",
-                    "AMID Chrome Extension",
-                    Forms.MessageBoxButtons.OK,
-                    Forms.MessageBoxIcon.Warning);
-            }
+            Forms.MessageBox.Show(
+                this,
+                "Could not copy chrome://extensions.\r\n\r\n" +
+                "Open Chrome manually and go to chrome://extensions.\r\n\r\n" +
+                ex.Message,
+                "AMID Chrome Extension",
+                Forms.MessageBoxButtons.OK,
+                Forms.MessageBoxIcon.Warning);
         }
     }
 }
